@@ -51,22 +51,33 @@ if __name__ == '__main__':
         if f.is_file() and f.name.endswith(".py"):
             shutil.copy(f.path, os.path.join(log_dir, "code"))
 
-    model = Linear_model()
+
+
+    model = Linear_model_pt()
+    logger.info(model)
+    # logger.info(model.parameters())
+
+    for name, param in model.named_parameters():
+        if param.requires_grad:
+            logger.info(f"name={name}, param={param.data}")
     batch_size = 10
     n_epoch = 1000
     losses = []
     step_size = 10 / batch_size
+    opt = torch.optim.SGD(model.parameters(), lr=step_size, momentum=.0)
 
     train_data, test_data, train_label, test_label = build_data()
     train_label_oh, test_label_oh = to_one_hot(train_label), to_one_hot(test_label)
     for i in range(n_epoch):
         total_loss = 0
         for batch_data, label in zip(train_data.split(batch_size), train_label_oh.split(batch_size)):
-            y = model.forward(batch_data)
-            # print(y)
-            loss = MSELoss(y, label)
-            total_loss += loss
-            model.backward(label, y, step_size)
+            opt.zero_grad()
+            y = model(batch_data)
+            mseloss = torch.nn.MSELoss()
+            loss = mseloss(y, label)
+            total_loss += loss.float()
+            loss.backward()
+            opt.step()
 
         y = model.forward(train_data)
         _, result = torch.max(y, 1)
