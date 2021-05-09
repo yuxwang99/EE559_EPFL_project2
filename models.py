@@ -6,7 +6,8 @@ class Linear_model(Module):
         super(Linear_model, self).__init__()
         self.dim_in, self.dim_out = 2, 2
 
-        self.layers = Sequential(Linear(self.dim_in, 25),
+        self.layers = Sequential(Linear(self.dim_in, 25, bias=False),
+                                 BatchNorm(25, affine=True),
                                  Sigmoid(),
                                  # Linear(25, 25),
                                  # ReLU(),
@@ -15,6 +16,7 @@ class Linear_model(Module):
                                  # Linear(25, 25),
                                  # ReLU(),
                                  Linear(25, self.dim_out),
+                                 BatchNorm(self.dim_out, affine=True),
                                  Sigmoid()
                                  )
 

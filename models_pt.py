@@ -7,6 +7,7 @@ class Linear_model_pt(Module):
         self.dim_in, self.dim_out = 2, 2
 
         self.layers = Sequential(Linear(self.dim_in, 25, bias=False),
+                                 BatchNorm1d(num_features=25,affine=False),
                                  Sigmoid(),
                                  # Linear(25, 25),
                                  # ReLU(),
