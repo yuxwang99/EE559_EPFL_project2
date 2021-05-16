@@ -1,7 +1,6 @@
 from unittest import TestCase
 
 import torch
-import numpy as np
 
 from mini_framework import *
 

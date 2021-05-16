@@ -1,4 +1,4 @@
-from mini_framework import MSELoss
+from mini_framework import F_MSELoss
 from models import Linear_model
 from models_pt import Linear_model_pt
 import random

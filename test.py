@@ -1,4 +1,4 @@
-from mini_framework import MSELoss
+from mini_framework import F_MSELoss
 from models import Linear_model
 from models_pt import Linear_model_pt
 import random
@@ -64,7 +64,7 @@ if __name__ == '__main__':
         for batch_data, label in zip(train_data.split(batch_size), train_label_oh.split(batch_size)):
             y = model.forward(batch_data)
             # print(y)
-            loss = MSELoss(y, label)
+            loss = F_MSELoss(y, label)
             total_loss += loss
             model.backward(label, y, step_size)
 

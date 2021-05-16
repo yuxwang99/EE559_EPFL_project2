@@ -1,20 +1,16 @@
-from torch import empty
-import torch
+from torch import empty, ones
 import logger
 import math
 from collections import OrderedDict
 
-x = empty([11, 2])
 
-
-def MSELoss(v, t):
+def F_MSELoss(v, t):
     dif = (v - t).view(-1, 1)
-    losses = torch.sum(torch.pow(dif, 2))
-    return torch.sqrt(losses)
-
+    losses = dif.pow(2).sum()
+    return losses.sqrt()
 
 def dloss(v, t):
-    return (v - t) / MSELoss(v, t)
+    return (v - t) / F_MSELoss(v, t)
 
 
 class Module(object):
@@ -54,7 +50,6 @@ class Sequential(Module):
     def backward(self, label, y, eta):
         dl_dout = dloss(y, label)
         for idx in range(len(self._module))[::-1]:
-            # idx = str(len(self._module) - int(module_idx) - 1)
             idx = str(idx)
             dl_dout = self._module[idx].backward(dl_dout, self._cache[idx], eta)
         self.clear_cache()
@@ -66,12 +61,22 @@ class Tanh(Module):
 
         # num = torch.exp(data.double()) - torch.exp(-data.double())
         # den = torch.exp(data.double()) + torch.exp(-data.double())
-        output = 1-2/(torch.exp(2*data.float())+1)
+        output = 1-2/((2*data.float()).exp()+1)
         cache = data
         return output, cache
 
     def backward(self, dl, x, eta):
-        return dl * (1 - torch.pow(self.forward(x)[0], 2))
+        return dl * (1 - self.forward(x)[0].pow(2))
+
+# class MSE(Module):
+#     def forward(self, data, target):
+#
+#         output = 1-2/((2*data.float()).exp()+1)
+#         cache = data
+#         return output, cache
+#
+#     def backward(self, dl, x, eta):
+#         return dl * (1 - self.forward(x)[0].pow(2))
 
 
 class BatchNorm(Module):
@@ -102,7 +107,7 @@ class BatchNorm(Module):
         N, D = x.shape
 
         # step1: calculate mean
-        mu = 1. / N * torch.sum(x, dim=0)
+        mu = 1. / N * x.sum(dim=0)
 
         # step2: subtract mean vector of every trainings example
         xmu = x - mu
@@ -111,10 +116,10 @@ class BatchNorm(Module):
         sq = xmu ** 2
 
         # step4: calculate variance
-        var = 1. / N * torch.sum(sq, dim=0)
+        var = 1. / N * sq.sum(dim=0)
 
         # step5: add eps for numerical stability, then sqrt
-        sqrtvar = torch.sqrt(var + self.eps)
+        sqrtvar = (var + self.eps).sqrt()
 
         # step6: invert sqrtwar
         ivar = 1. / sqrtvar
@@ -145,11 +150,11 @@ class BatchNorm(Module):
 
         if self.affine:
             # step9
-            dbeta = torch.sum(dl, dim=0)
+            dbeta = dl.sum(dim=0)
             dgammax = dl  # not necessary, but more understandable
 
             # step8
-            dgamma = torch.sum(dgammax * xhat, dim=0)
+            dgamma = (dgammax * xhat).sum(dim=0)
             dxhat = dgammax * self.gamma
 
             self.gamma = self.gamma - eta * dgamma
@@ -159,32 +164,32 @@ class BatchNorm(Module):
             dxhat = dl
 
         # step7
-        divar = torch.sum(dxhat * xmu, dim=0)
+        divar = (dxhat * xmu).sum(dim=0)
         dxmu1 = dxhat * ivar
 
         # step6
         dsqrtvar = -1. / (sqrtvar ** 2) * divar
 
         # step5
-        dvar = 0.5 * 1. / torch.sqrt(var + self.eps) * dsqrtvar
+        dvar = 0.5 * 1. / (var + self.eps).sqrt() * dsqrtvar
 
         # step4
-        dsq = 1. / N * torch.ones((N, D)) * dvar
+        dsq = 1. / N * ones((N, D)) * dvar
 
         # step3
         dxmu2 = 2 * xmu * dsq
 
         # step2
         dx1 = (dxmu1 + dxmu2)
-        dmu = -1 * torch.sum(dxmu1 + dxmu2, dim=0)
+        dmu = -1 * (dxmu1 + dxmu2).sum(dim=0)
 
         # step1
-        dx2 = 1. / N * torch.ones((N, D)) * dmu
+        dx2 = 1. / N * ones((N, D)) * dmu
 
         # step0
         dx = dx1 + dx2
         return dx
-        # return dl * (torch.std(x, dim=0), 2)
+
 
 
     def check_input_dim(self,input):
@@ -209,7 +214,7 @@ class ReLU(Module):
 class Sigmoid(Module):
     #TODO not working yet
     def forward(self, data):
-        output = 1/(torch.exp(-data.float())+1)
+        output = 1/((-data.float()).exp()+1)
         cache = data
         return output, cache
 
