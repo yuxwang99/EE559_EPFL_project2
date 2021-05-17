@@ -8,6 +8,7 @@ class Linear_model(Module):
 
         self.layers = Sequential(Linear(self.dim_in, 25, bias=False),
                                  BatchNorm(25, affine=True),
+                                 Conv1D(kernel_size=1),
                                  Sigmoid(),
                                  # Linear(25, 25),
                                  # ReLU(),
@@ -17,11 +18,17 @@ class Linear_model(Module):
                                  # ReLU(),
                                  Linear(25, self.dim_out),
                                  BatchNorm(self.dim_out, affine=True),
-                                 Sigmoid()
+                                 Sigmoid(),
                                  )
+
+        # self.layers = Sequential(Conv1D(kernel_size=1),
+        #                          Sigmoid(),
+        #                          )
 
     def forward(self, data):
         return self.layers.forward(data)
 
-    def backward(self, label, y, eta):
-        self.layers.backward(label, y, eta)
+    def backward(self, gradwrtoutput, eta):
+        self.layers.backward(gradwrtoutput, eta)
+
+

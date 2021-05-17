@@ -1,4 +1,4 @@
-from mini_framework import F_MSELoss
+from mini_framework import F_MSE, MSE, L2loss, L1loss
 from models import Linear_model
 from models_pt import Linear_model_pt
 import random
@@ -9,10 +9,11 @@ import logger
 import os
 import shutil
 
+torch.manual_seed(0)
+
 def to_one_hot(classes):
     n = classes.size()[0]
     d = max(classes) + 1
-    # TODO why d.int but classes.long ? maybe both should be long ?
     classes_oh = torch.zeros(n, d.int())
     classes_oh[range(n), classes.long()] = 1
     return classes_oh
@@ -59,14 +60,17 @@ if __name__ == '__main__':
 
     train_data, test_data, train_label, test_label = build_data()
     train_label_oh, test_label_oh = to_one_hot(train_label), to_one_hot(test_label)
+
+    mse = MSE()
     for i in range(n_epoch):
         total_loss = 0
         for batch_data, label in zip(train_data.split(batch_size), train_label_oh.split(batch_size)):
             y = model.forward(batch_data)
             # print(y)
-            loss = F_MSELoss(y, label)
+            loss = mse.forward(y, label)
             total_loss += loss
-            model.backward(label, y, step_size)
+            dloss = mse.backward()
+            model.backward(dloss, step_size)
 
         y = model.forward(train_data)
         _, result = torch.max(y, 1)
