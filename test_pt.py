@@ -1,4 +1,4 @@
-from mini_framework import F_MSELoss
+from mini_framework import F_MSE
 from models import Linear_model
 from models_pt import Linear_model_pt
 import random
@@ -12,7 +12,6 @@ import shutil
 def to_one_hot(classes):
     n = classes.size()[0]
     d = max(classes) + 1
-    # TODO why d.int but classes.long ? maybe both should be long ?
     classes_oh = torch.zeros(n, d.int())
     classes_oh[range(n), classes.long()] = 1
     return classes_oh
