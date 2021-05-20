@@ -9,29 +9,7 @@ import logger
 import os
 import shutil
 
-# torch.manual_seed(0)
-
-def to_one_hot(classes):
-    n = classes.size()[0]
-    d = max(classes) + 1
-    classes_oh = torch.zeros(n, d.int())
-    classes_oh[range(n), classes.long()] = 1
-    return classes_oh
-
-
-def build_data():
-    train_data, test_data = torch.rand([1000, 2]), torch.rand([1000, 2])
-
-    d_train, d_test = torch.sqrt((train_data[:, 0] - 0.5) ** 2 + (train_data[:, 1] - 0.5) ** 2), \
-                      torch.sqrt((test_data[:, 0] - 0.5) ** 2 + (test_data[:, 1] - 0.5) ** 2)
-
-    train_label, test_label = torch.zeros(1000), torch.zeros(1000)
-    train_label[d_train < 1 / torch.sqrt(2 * torch.tensor(math.pi))] = 1
-    test_label[d_test < 1 / torch.sqrt(2 * torch.tensor(math.pi))] = 1
-
-
-
-    return train_data, test_data, train_label, test_label
+from helper import *
 
 
 
@@ -54,40 +32,48 @@ if __name__ == '__main__':
 
     model = Linear_model()
     batch_size = 10
-    n_epoch = 1000
+    n_epoch = 200
     losses = []
-    step_size = 10 / batch_size
+    step_size = 1 # Sigmoid 1 , ReLU 0.001
 
     train_data, test_data, train_label, test_label = build_data()
     train_label_oh, test_label_oh = to_one_hot(train_label), to_one_hot(test_label)
 
     mse = MSE()
+    all_loss=[]
     for i in range(n_epoch):
         total_loss = 0
+        num_batch = len(train_data.split(batch_size))
         for batch_data, label in zip(train_data.split(batch_size), train_label_oh.split(batch_size)):
             y = model.forward(batch_data)
             # print(y)
             loss = mse.forward(y, label)
             total_loss += loss
+            all_loss.append(loss)
             dloss = mse.backward()
             model.backward(dloss, step_size)
 
-        y = model.forward(train_data)
-        _, result = torch.max(y, 1)
+        y_train = model.forward(train_data)
+        _, result = torch.max(y_train, 1)
 
         if i % 20 == 0:
-            logger.info(f'The accurancy of {i}th epoch is {sum(result == train_label) / 1000.0}')
-            logger.info(f'currant loss is  {total_loss}')
+            p, r, f = metric(result, train_label)
+            logger.info("\n"
+                        f'The train precision of {i}th epoch is {p}\n'
+                        f'The train recall    of {i}th epoch is {r}\n'
+                        f'The train f1        of {i}th epoch is {f}\n')
+            y_test = model.forward(test_data)
+            _, result = torch.max(y_test, 1)
+            p, r, f = metric(result, test_label)
+            logger.info("\n"
+                        f'The test precision of {i}th epoch is {p}\n'
+                        f'The test recall    of {i}th epoch is {r}\n'
+                        f'The test f1        of {i}th epoch is {f}\n')
+            logger.info(f'currant loss per data point is  {total_loss/num_batch}')
             if i != 0:
                 if i < 200 & i % 100 == 0:
                     step_size = step_size / 2
                 elif i > 200 & i % 50 == 0:
                     step_size = step_size / 2
         losses.append(total_loss)
-        # new_idx = torch.randperm(1000)
-        # train_data = train_data[new_idx,:]
-        # train_label_oh = train_label_oh[new_idx,:]
 
-    y = model.forward(test_data)
-    _, result = torch.max(y, 1)
-    logger.info(f'The accurancy of test data is { sum(result == test_label) / 1000.0}')

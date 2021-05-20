@@ -9,30 +9,7 @@ import logger
 import os
 import shutil
 
-def to_one_hot(classes):
-    n = classes.size()[0]
-    d = max(classes) + 1
-    classes_oh = torch.zeros(n, d.int())
-    classes_oh[range(n), classes.long()] = 1
-    return classes_oh
-
-
-def build_data():
-    train_data, test_data = torch.rand([1000, 2]), torch.rand([1000, 2])
-
-    d_train, d_test = torch.sqrt((train_data[:, 0] - 0.5) ** 2 + (train_data[:, 1] - 0.5) ** 2), \
-                      torch.sqrt((test_data[:, 0] - 0.5) ** 2 + (test_data[:, 1] - 0.5) ** 2)
-
-    train_label, test_label = torch.zeros(1000), torch.zeros(1000)
-    train_label[d_train < 1 / torch.sqrt(2 * torch.tensor(math.pi))] = 1
-    test_label[d_test < 1 / torch.sqrt(2 * torch.tensor(math.pi))] = 1
-
-
-
-    return train_data, test_data, train_label, test_label
-
-
-
+from helper import to_one_hot,build_data
 
 
 if __name__ == '__main__':
@@ -40,7 +17,7 @@ if __name__ == '__main__':
     # set up logs
     log_dir = "logs"
     time_str = time.strftime('%m-%d-%H-%M')
-    log_name = "{}".format(time_str)
+    log_name = "{}_pt".format(time_str)
     log_dir = os.path.join(log_dir, log_name)
     logger.set_logger_dir(log_dir)
 
@@ -90,9 +67,7 @@ if __name__ == '__main__':
                 elif i > 200 & i % 50 == 0:
                     step_size = step_size / 2
         losses.append(total_loss)
-        # new_idx = torch.randperm(1000)
-        # train_data = train_data[new_idx,:]
-        # train_label_oh = train_label_oh[new_idx,:]
+
 
     y = model.forward(test_data)
     _, result = torch.max(y, 1)

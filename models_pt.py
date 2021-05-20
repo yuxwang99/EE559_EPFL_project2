@@ -8,18 +8,18 @@ class Linear_model_pt(Module):
 
         self.layers = Sequential(Linear(self.dim_in, 25, bias=False),
                                  Sigmoid(),
-                                 BatchNorm1d(25, affine=True),
+                                 # BatchNorm1d(25, affine=True),
                                  Linear(25, 25),
                                  ReLU(),
-                                 BatchNorm1d(25, affine=True),
+                                 # BatchNorm1d(25, affine=True),
                                  Linear(25, 25),
                                  ReLU(),
-                                 BatchNorm1d(25, affine=True),
+                                 # BatchNorm1d(25, affine=True),
                                  Linear(25, 25),
                                  ReLU(),
-                                 BatchNorm1d(25, affine=True),
+                                 # BatchNorm1d(25, affine=True),
                                  Linear(25, self.dim_out),
-                                 BatchNorm1d(self.dim_out, affine=True),
+                                 # BatchNorm1d(self.dim_out, affine=True),
                                  Sigmoid(),
                                  )
 
