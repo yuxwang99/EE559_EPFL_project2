@@ -14,7 +14,8 @@ def F_MSE(pred, target):
     Returns: MSE loss
 
     """
-    return F_L2(pred, target).sqrt()
+    n = len(target)
+    return F_L2(pred, target)/n
 
 
 def F_L2(pred, target):
@@ -198,7 +199,7 @@ class Tanh(Module):
         return dl * (1 - self.forward(x)[0].pow(2))
 
 
-class BatchNorm(Module):
+class BatchNorm1d(Module):
     """
     Applies Batch Normalization over an input tensor, if affine = True, a linear transformation is applied
     """

@@ -4,6 +4,8 @@ import torch
 from mini_framework import *
 from torch.autograd import Variable
 import numpy as np
+from helper import *
+
 
 class TestTanh(TestCase):
     def setUp(self):
@@ -55,7 +57,7 @@ class TestConv1D(TestCase):
         N = 8
         C = 1
         L = 24
-        x = torch.ones([N, C, L])*0.2
+        x = torch.ones([N, C, L]) * 0.2
         conv1d = Conv1D(in_channel=1, out_channel=3, kernel_size=3, stride=1)
         y = conv1d.forward(x)
 
@@ -63,9 +65,6 @@ class TestConv1D(TestCase):
         output = m(x)
 
         print(output)
-
-
-
 
     def test_end2end(self):
         ## initialize your layer and PyTorch layer
@@ -91,10 +90,24 @@ class TestConv1D(TestCase):
         ## Compare
         def compare(x, y):
             y = y.detach().numpy()
-            print(abs(x-y).max())
+            print(abs(x - y).max())
             return
 
         compare(y1, y2)
         compare(dx, x2.grad)
         compare(net1.kernel_grad, net2.weight.grad)
         compare(net1.bias_grad, net2.bias.grad)
+
+
+class Test(TestCase):
+    def test_f_mse(self):
+        data2, data1, label2, label1 = build_data()
+        train_label_oh, test_label_oh = to_one_hot(label2), to_one_hot(label1)
+        mseloss = torch.nn.MSELoss(reduction="mean")
+        loss_pt = mseloss(data2, data1)*data2.size()[1]
+        mse = MSE()
+        loss = mse(data2, data1)
+        print(loss_pt)
+        print(loss)
+
+        self.assertEqual(loss_pt, loss)

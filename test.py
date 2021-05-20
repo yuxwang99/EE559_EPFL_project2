@@ -1,10 +1,7 @@
 from mini_framework import F_MSE, MSE, L2loss, L1loss
 from models import Linear_model
 from models_pt import Linear_model_pt
-import random
 import time
-import torch
-import math
 import logger
 import os
 import shutil
@@ -12,15 +9,21 @@ import shutil
 from helper import *
 
 
-
-
+# pytorch vs pychrot
+# FRAMEWORK = "pytorch"
+FRAMEWORK = "pychrot"
+exp_name = "sigmoid_no_BN"
 
 if __name__ == '__main__':
+
+    startTime = int(round(time.time() * 1000))
+
+    assert FRAMEWORK in ["pytorch","pychrot"]
 
     # set up logs
     log_dir = "logs"
     time_str = time.strftime('%m-%d-%H-%M')
-    log_name = "{}".format(time_str)
+    log_name = "{}_{}_{}".format(time_str,FRAMEWORK, exp_name)
     log_dir = os.path.join(log_dir, log_name)
     logger.set_logger_dir(log_dir)
 
@@ -30,28 +33,49 @@ if __name__ == '__main__':
         if f.is_file() and f.name.endswith(".py"):
             shutil.copy(f.path, os.path.join(log_dir, "code"))
 
-    model = Linear_model()
     batch_size = 10
     n_epoch = 200
     losses = []
-    step_size = 1 # Sigmoid 1 , ReLU 0.001
+    step_size = 100 # Sigmoid 1 , ReLU 0.001
+
+    if FRAMEWORK == "pytorch":
+        model = Linear_model_pt()
+        mse = torch.nn.MSELoss()
+        opt = torch.optim.SGD(model.parameters(), lr=step_size, momentum=.0)
+    elif FRAMEWORK == "pychrot":
+        model = Linear_model()
+        mse = MSE()
+    else:
+        raise RuntimeError
 
     train_data, test_data, train_label, test_label = build_data()
     train_label_oh, test_label_oh = to_one_hot(train_label), to_one_hot(test_label)
 
-    mse = MSE()
+
+
     all_loss=[]
+
+    lowest_loss=0
+
     for i in range(n_epoch):
         total_loss = 0
         num_batch = len(train_data.split(batch_size))
         for batch_data, label in zip(train_data.split(batch_size), train_label_oh.split(batch_size)):
             y = model.forward(batch_data)
-            # print(y)
-            loss = mse.forward(y, label)
-            total_loss += loss
-            all_loss.append(loss)
-            dloss = mse.backward()
-            model.backward(dloss, step_size)
+            loss = mse(y, label)
+
+            if FRAMEWORK == "pytorch":
+                opt.zero_grad()
+                total_loss += loss.float() * 2  #
+                loss.backward()
+                opt.step()
+            elif FRAMEWORK == "pychrot":
+                total_loss += loss
+                all_loss.append(loss)
+                dloss = mse.backward()
+                model.backward(dloss, step_size)
+            else:
+                raise RuntimeError
 
         y_train = model.forward(train_data)
         _, result = torch.max(y_train, 1)
@@ -75,5 +99,10 @@ if __name__ == '__main__':
                     step_size = step_size / 2
                 elif i > 200 & i % 50 == 0:
                     step_size = step_size / 2
+
+
         losses.append(total_loss)
 
+    endTime = int(round(time.time() * 1000))
+
+    logger.info('{}s'.format((endTime - startTime)/1000))

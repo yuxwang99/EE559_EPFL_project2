@@ -7,20 +7,17 @@ class Linear_model_pt(Module):
         self.dim_in, self.dim_out = 2, 2
 
         self.layers = Sequential(Linear(self.dim_in, 25, bias=False),
-                                 Sigmoid(),
-                                 # BatchNorm1d(25, affine=True),
+                                 BatchNorm1d(25, affine=True),
+                                 ReLU(),
                                  Linear(25, 25),
                                  ReLU(),
-                                 # BatchNorm1d(25, affine=True),
                                  Linear(25, 25),
                                  ReLU(),
-                                 # BatchNorm1d(25, affine=True),
                                  Linear(25, 25),
                                  ReLU(),
-                                 # BatchNorm1d(25, affine=True),
                                  Linear(25, self.dim_out),
-                                 # BatchNorm1d(self.dim_out, affine=True),
-                                 Sigmoid(),
+                                 BatchNorm1d(self.dim_out, affine=True),
+                                 ReLU(),
                                  )
 
     def forward(self, data):
