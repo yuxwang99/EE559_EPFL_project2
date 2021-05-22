@@ -1,8 +1,6 @@
 from torch import empty, ones
-import logger
 import math
 from collections import OrderedDict
-
 
 def F_MSE(pred, target):
     """
@@ -360,7 +358,6 @@ class Conv1D(Module):
         self.bias_grad = empty([out_channel])
         self.reset_parameters()
 
-
     def forward(self, x):
         N, C_in, L_in = x.size()
         assert C_in == self.in_channel, 'Expected the inputs to have {} channels'.format(self.in_channel)
@@ -402,3 +399,17 @@ class Conv1D(Module):
 
     def conv_single_step(self, input, W, b):
         return (input*W+b).sum([1, 2])
+
+
+class Flatten(Module):
+    def __call__(self, x):
+        return self.forward(x)
+
+    def forward(self, x):
+        self.x_0 = x.shape[0]
+        self.x_1 = x.shape[1]
+        self.x_2 = x.shape[2]
+        return x.reshape(x.shape[0], x.shape[1] * x.shape[2]),None
+
+    def backward(self, x, cache, eta=5 * 1e-1):
+        return x.reshape(self.x_0, self.x_1, self.x_2)

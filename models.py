@@ -1,3 +1,5 @@
+import torch
+
 from mini_framework import *
 
 
@@ -8,16 +10,16 @@ class Linear_model(Module):
 
         self.layers = Sequential(Linear(self.dim_in, 25, bias=False),
                                  # BatchNorm1d(25, affine=True),
-                                 Sigmoid(),
+                                 Tanh(),
                                  Linear(25, 25),
-                                 Sigmoid(),
+                                 Tanh(),
                                  Linear(25, 25),
-                                 Sigmoid(),
+                                 Tanh(),
                                  Linear(25, 25),
-                                 Sigmoid(),
+                                 Tanh(),
                                  Linear(25, self.dim_out),
                                  BatchNorm1d(self.dim_out, affine=True),
-                                 Sigmoid(),
+                                 Tanh(),
                                  )
 
 
@@ -27,4 +29,30 @@ class Linear_model(Module):
     def backward(self, gradwrtoutput, eta):
         self.layers.backward(gradwrtoutput, eta)
 
-#
+
+class CNN_model(Module):
+    def __init__(self):
+        super(CNN_model, self).__init__()
+        self.dim_in, self.dim_out = 2, 2
+
+        self.layers = Sequential(
+                                 Conv1D(in_channel=1, out_channel=1, kernel_size=1, stride=1),
+                                 Flatten(),
+                                 ReLU(),
+                                 Linear(2, 25),
+                                 ReLU(),
+                                 Linear(25, 25),
+                                 ReLU(),
+                                 Linear(25, 25),
+                                 Sigmoid(),
+                                 Linear(25, 2),
+                                 Sigmoid(),
+                                 )
+
+
+    def forward(self, data):
+        data = torch.unsqueeze(data, dim=1)
+        return self.layers.forward(data)
+
+    def backward(self, gradwrtoutput, eta):
+        self.layers.backward(gradwrtoutput, eta)

@@ -5,7 +5,8 @@ from mini_framework import *
 from torch.autograd import Variable
 import numpy as np
 from helper import *
-
+from torch import nn
+np.random.seed(0)
 
 class TestTanh(TestCase):
     def setUp(self):
@@ -54,6 +55,7 @@ class TestLinear(TestCase):
 
 class TestConv1D(TestCase):
     def test_forward(self):
+
         N = 8
         C = 1
         L = 24
@@ -68,35 +70,43 @@ class TestConv1D(TestCase):
 
     def test_end2end(self):
         ## initialize your layer and PyTorch layer
-        net1 = Conv1D(8, 12, 3, 2)
+        net1 = Conv1D_ref(8, 12, 3, 2)
         net2 = torch.nn.Conv1d(8, 12, 3, 2)
+        net3 = Conv1D(8, 12, 3, 2)
         ## initialize the inputs
-        x1 = torch.tensor(np.random.rand(3, 8, 20))
-        x2 = Variable(torch.tensor(x1, dtype=torch.float), requires_grad=True)
+        x1 = np.random.rand(3, 8, 20)
+        x2 = Variable(torch.tensor(x1), requires_grad=True)
+        x3 = x2
         ## Copy the parameters from the Conv1D class to PyTorch layer
-        net2.weight = torch.nn.Parameter(torch.tensor(net1.kernel))
-        net2.bias = torch.nn.Parameter(torch.tensor(net1.bias))
+        net2.weight = nn.Parameter(torch.tensor(net1.W))
+        net2.bias = nn.Parameter(torch.tensor(net1.b))
+        net3.kernel = torch.tensor(net1.W)
+        net3.bias = torch.tensor(net1.b)
         ## Your forward and backward
-        y1, cache = net1(x1)
+        y1 = net1(x1)
         b, c, w = y1.shape
-        delta = torch.tensor(np.random.randn(b, c, w))
-        dx = net1.backward(delta, cache)
+        delta = np.random.randn(b, c, w)
+        dx = net1.backward(delta)
         ## PyTorch forward and backward
-
         y2 = net2(x2)
-        delta = torch.tensor(delta, dtype=torch.float)
+        delta = torch.tensor(delta)
         y2.backward(delta)
+        ## Your forward and backward
+        y3, cache = net3(x3)
+        b, c, w = y3.shape
+        delta = torch.tensor(np.random.randn(b, c, w))
+        dx = net3.backward(delta, cache)
 
         ## Compare
         def compare(x, y):
             y = y.detach().numpy()
-            print(abs(x - y).max())
+            print(abs(x).max())
             return
 
         compare(y1, y2)
         compare(dx, x2.grad)
-        compare(net1.kernel_grad, net2.weight.grad)
-        compare(net1.bias_grad, net2.bias.grad)
+        compare(net1.dW, net2.weight.grad)
+        compare(net1.db, net2.bias.grad)
 
 
 class Test(TestCase):

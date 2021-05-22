@@ -1,5 +1,5 @@
 from mini_framework import F_MSE, MSE, L2loss, L1loss
-from models import Linear_model
+from models import *
 from models_pt import Linear_model_pt
 import time
 import logger
@@ -12,7 +12,7 @@ from helper import *
 # pytorch vs pychrot
 # FRAMEWORK = "pytorch"
 FRAMEWORK = "pychrot"
-exp_name = "sigmoid_no_BN"
+exp_name = "tanh"
 
 if __name__ == '__main__':
 
@@ -34,9 +34,9 @@ if __name__ == '__main__':
             shutil.copy(f.path, os.path.join(log_dir, "code"))
 
     batch_size = 10
-    n_epoch = 200
+    n_epoch = 400
     losses = []
-    step_size = 100 # Sigmoid 1 , ReLU 0.001
+    step_size = 1 # Sigmoid 1 , ReLU 0.001
 
     if FRAMEWORK == "pytorch":
         model = Linear_model_pt()
