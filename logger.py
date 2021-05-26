@@ -7,8 +7,7 @@ import os.path
 import shutil
 import sys
 from datetime import datetime
-from six.moves import input
-from termcolor import colored
+# from six.moves import input
 import errno
 
 __all__ = ['set_logger_dir', 'auto_set_dir', 'get_logger_dir']
@@ -16,14 +15,14 @@ __all__ = ['set_logger_dir', 'auto_set_dir', 'get_logger_dir']
 
 class _MyFormatter(logging.Formatter):
     def format(self, record):
-        date = colored('[%(asctime)s @%(filename)s:%(lineno)d]', 'green')
+        date = '[%(asctime)s @%(filename)s:%(lineno)d]'
         msg = '%(message)s'
         if record.levelno == logging.WARNING:
-            fmt = date + ' ' + colored('WRN', 'red', attrs=['blink']) + ' ' + msg
+            fmt = date + ' ' + msg
         elif record.levelno == logging.ERROR or record.levelno == logging.CRITICAL:
-            fmt = date + ' ' + colored('ERR', 'red', attrs=['blink', 'underline']) + ' ' + msg
+            fmt = date + ' ' + msg
         elif record.levelno == logging.DEBUG:
-            fmt = date + ' ' + colored('DBG', 'yellow', attrs=['blink']) + ' ' + msg
+            fmt = date + ' ' + msg
         else:
             fmt = date + ' ' + msg
         if hasattr(self, '_style'):
