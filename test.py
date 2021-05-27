@@ -5,13 +5,12 @@ import time
 import logger
 import os
 import shutil
-
 from helper import *
 
-
-# pytorch vs pychrot
-# FRAMEWORK = "pytorch"
+# use pychrot as framework, pytorch is also possible
 FRAMEWORK = "pychrot"
+
+# set experience name for the log
 exp_name = "tanh"
 
 if __name__ == '__main__':
@@ -38,6 +37,7 @@ if __name__ == '__main__':
     losses = []
     step_size = 1 # Sigmoid 1 , ReLU 0.001
 
+    # initiate models
     if FRAMEWORK == "pytorch":
         model = Linear_model_pt()
         mse = torch.nn.MSELoss()
@@ -48,15 +48,21 @@ if __name__ == '__main__':
     else:
         raise RuntimeError
 
+    # get data sets
     train_data, test_data, train_label, test_label = build_data()
     train_label_oh, test_label_oh = to_one_hot(train_label), to_one_hot(test_label)
 
-
-
+    # keep track of losses
     all_loss=[]
-
     lowest_loss=0
 
+    print('##############################################################################\n'
+          '# Reproduction of best performance with model implemented in Mini-framework  #\n'
+          '# This will output Test F1 score = 98.7% at the end of training.             #\n'
+          '##############################################################################\n')
+
+
+    # train
     for i in range(n_epoch):
         total_loss = 0
         num_batch = len(train_data.split(batch_size))
@@ -80,6 +86,7 @@ if __name__ == '__main__':
         y_train = model.forward(train_data)
         _, result = torch.max(y_train, 1)
 
+        # print evaluation results every 20 epochs
         if i % 20 == 0:
             p, r, f = metric(result, train_label)
             logger.info("\n"
@@ -99,10 +106,17 @@ if __name__ == '__main__':
                     step_size = step_size / 2
                 elif i > 200 & i % 50 == 0:
                     step_size = step_size / 2
-
-
         losses.append(total_loss)
 
     endTime = int(round(time.time() * 1000))
 
     logger.info('{}s'.format((endTime - startTime)/1000))
+
+    print('##############################################################################\n'
+          '# Reproduction finished                                                      #\n'
+          '# You should get                                                             #\n'
+          '# Test F1 score = 98.7%(as in report)                                        #\n'
+          '# Loss = 0.726                                                               #\n'
+          '# at the end of training.                                                    #\n'
+          '##############################################################################\n')
+

@@ -4,6 +4,9 @@ from mini_framework import *
 
 
 class Linear_model(Module):
+    """
+    Linear model implemented with pytorch
+    """
     def __init__(self):
         super(Linear_model, self).__init__()
         self.dim_in, self.dim_out = 2, 2
@@ -31,6 +34,9 @@ class Linear_model(Module):
 
 
 class CNN_model(Module):
+    """
+    CNN model implemented with PyChrot
+    """
     def __init__(self):
         super(CNN_model, self).__init__()
         self.dim_in, self.dim_out = 2, 2

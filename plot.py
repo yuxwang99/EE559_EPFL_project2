@@ -1,9 +1,11 @@
-import numpy as np
 import matplotlib.pyplot as plt
 from helper import build_data
 
 
 def plot_data():
+    """
+    plot input data in a 2d scatter plot
+    """
     train_data, _, train_label, _ = build_data()
 
     train_data = train_data.numpy()

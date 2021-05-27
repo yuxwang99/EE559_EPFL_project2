@@ -2,6 +2,9 @@ from torch.nn import *
 
 
 class Linear_model_pt(Module):
+    """
+    Linear model implemented with pytorch
+    """
     def __init__(self):
         super(Linear_model_pt, self).__init__()
         self.dim_in, self.dim_out = 2, 2
