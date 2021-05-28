@@ -105,7 +105,6 @@ if __name__ == '__main__':
           '# Reproduction finished                                                      #\n'
           '# You should get                                                             #\n'
           '# Test F1 score = 98.9%(as in report)                                        #\n'
-          '# Loss = 0.839                                                               #\n'
           '# at the end of training.                                                    #\n'
           '##############################################################################\n')
 

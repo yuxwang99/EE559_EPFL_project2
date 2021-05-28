@@ -1,6 +1,10 @@
-from torch import empty
+from torch import empty, Generator
 import math
 from collections import OrderedDict
+
+# fix random seed for parameter initialization
+g_cpu = Generator()
+g = g_cpu.manual_seed(2147483646)
 
 def F_MSE(pred, target):
     """
@@ -274,7 +278,7 @@ class BatchNorm1d(Module):
 
     def reset_parameters(self):
         if self.affine:
-            self.weight.data.uniform_()
+            self.weight.data.uniform_(generator=g)
             self.bias.data.zero_()
 
 class ReLU(Module):
@@ -337,9 +341,9 @@ class Linear(Module):
 
     def reset_parameters(self):
         stdv = math.sqrt(6/(self.weight.size()[0]+self.weight.size()[1]))
-        self.weight.data.uniform_(-stdv, stdv)
+        self.weight.data.uniform_(-stdv, stdv, generator=g)
         if self.use_bias:
-            self.bias.data.uniform_(-stdv, stdv)
+            self.bias.data.uniform_(-stdv, stdv, generator=g)
 
 
 class Conv1D(Module):
@@ -394,8 +398,8 @@ class Conv1D(Module):
 
     def reset_parameters(self):
         stdv = math.sqrt(6/(self.in_channel+self.out_channel))
-        self.kernel.data.uniform_(-stdv, stdv)
-        self.bias.data.uniform_(-stdv, stdv)
+        self.kernel.data.uniform_(-stdv, stdv, generator=g)
+        self.bias.data.uniform_(-stdv, stdv, generator=g)
 
     def conv_single_step(self, input, W, b):
         return (input*W+b).sum([1, 2])
