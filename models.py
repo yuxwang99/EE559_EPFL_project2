@@ -1,5 +1,3 @@
-import torch
-
 from mini_framework import *
 
 
@@ -57,7 +55,7 @@ class CNN_model(Module):
 
 
     def forward(self, data):
-        data = torch.unsqueeze(data, dim=1)
+        data = data.unsqueeze(dim=1)
         return self.layers.forward(data)
 
     def backward(self, gradwrtoutput, eta):

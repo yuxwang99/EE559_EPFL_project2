@@ -1,6 +1,5 @@
 from mini_framework import F_MSE, MSE, L2loss, L1loss
 from models import *
-from models_pt import Linear_model_pt
 import time
 import logger
 import os
@@ -17,7 +16,7 @@ if __name__ == '__main__':
 
     startTime = int(round(time.time() * 1000))
 
-    assert FRAMEWORK in ["pytorch","pychrot"]
+    assert FRAMEWORK in ["pychrot"]
 
     # set up logs
     log_dir = "logs"
@@ -37,12 +36,7 @@ if __name__ == '__main__':
     losses = []
     step_size = 1 # Sigmoid 1 , ReLU 0.001
 
-    # initiate models
-    if FRAMEWORK == "pytorch":
-        model = Linear_model_pt()
-        mse = torch.nn.MSELoss()
-        opt = torch.optim.SGD(model.parameters(), lr=step_size, momentum=.0)
-    elif FRAMEWORK == "pychrot":
+    if FRAMEWORK == "pychrot":
         model = Linear_model()
         mse = MSE()
     else:
@@ -58,7 +52,7 @@ if __name__ == '__main__':
 
     print('##############################################################################\n'
           '# Reproduction of best performance with model implemented in Mini-framework  #\n'
-          '# This will output Test F1 score = 98.7% at the end of training.             #\n'
+          '# This will output Test F1 score = 98.9% at the end of training.             #\n'
           '##############################################################################\n')
 
 
@@ -70,12 +64,7 @@ if __name__ == '__main__':
             y = model.forward(batch_data)
             loss = mse(y, label)
 
-            if FRAMEWORK == "pytorch":
-                opt.zero_grad()
-                total_loss += loss.float() * 2  #
-                loss.backward()
-                opt.step()
-            elif FRAMEWORK == "pychrot":
+            if FRAMEWORK == "pychrot":
                 total_loss += loss
                 all_loss.append(loss)
                 dloss = mse.backward()
@@ -84,7 +73,7 @@ if __name__ == '__main__':
                 raise RuntimeError
 
         y_train = model.forward(train_data)
-        _, result = torch.max(y_train, 1)
+        _, result = y_train.max(1)
 
         # print evaluation results every 20 epochs
         if i % 20 == 0:
@@ -94,7 +83,7 @@ if __name__ == '__main__':
                         f'The train recall    of {i}th epoch is {r}\n'
                         f'The train f1        of {i}th epoch is {f}\n')
             y_test = model.forward(test_data)
-            _, result = torch.max(y_test, 1)
+            _, result = y_test.max(1)
             p, r, f = metric(result, test_label)
             logger.info("\n"
                         f'The test precision of {i}th epoch is {p}\n'
@@ -115,8 +104,8 @@ if __name__ == '__main__':
     print('##############################################################################\n'
           '# Reproduction finished                                                      #\n'
           '# You should get                                                             #\n'
-          '# Test F1 score = 98.7%(as in report)                                        #\n'
-          '# Loss = 0.726                                                               #\n'
+          '# Test F1 score = 98.9%(as in report)                                        #\n'
+          '# Loss = 0.839                                                               #\n'
           '# at the end of training.                                                    #\n'
           '##############################################################################\n')
 

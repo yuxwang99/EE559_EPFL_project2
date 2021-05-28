@@ -1,4 +1,4 @@
-from torch import empty, ones
+from torch import empty
 import math
 from collections import OrderedDict
 
@@ -258,11 +258,11 @@ class BatchNorm1d(Module):
         dxmu1 = dxhat * ivar
         dsqrtvar = -1. / (sqrtvar ** 2) * divar
         dvar = 0.5 * 1. / (var + self.eps).sqrt() * dsqrtvar
-        dsq = 1. / N * ones((N, D)) * dvar
+        dsq = 1. / N * empty((N, D)).new_ones((N, D)) * dvar
         dxmu2 = 2 * xmu * dsq
         dx1 = (dxmu1 + dxmu2)
         dmu = -1 * (dxmu1 + dxmu2).sum(dim=0)
-        dx2 = 1. / N * ones((N, D)) * dmu
+        dx2 = 1. / N * empty((N, D)).new_ones((N, D)) * dmu
         dx = dx1 + dx2
         return dx
 

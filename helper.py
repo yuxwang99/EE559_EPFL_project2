@@ -1,26 +1,34 @@
-import torch
 import math
+from torch import empty
+import random
 
-torch.manual_seed(0)
+random.seed(6)
+
+
 
 
 def to_one_hot(classes):
     n = classes.size()[0]
     d = max(classes) + 1
-    classes_oh = torch.zeros(n, d.int())
+    classes_oh = empty(n, d.int()).new_zeros(n, d.int())
     classes_oh[range(n), classes.long()] = 1
     return classes_oh
 
 
 def build_data():
-    train_data, test_data = torch.rand([1000, 2]), torch.rand([1000, 2])
+    train_data, test_data = empty([1000, 2]), empty([1000, 2])
+    for i in range(1000):
+        for j in range(2):
+            train_data[i,j] = random.random()
+            test_data[i, j] = random.random()
 
-    d_train, d_test = torch.sqrt((train_data[:, 0] - 0.5) ** 2 + (train_data[:, 1] - 0.5) ** 2), \
-                      torch.sqrt((test_data[:, 0] - 0.5) ** 2 + (test_data[:, 1] - 0.5) ** 2)
+    d_train, d_test = ((train_data[:, 0] - 0.5) ** 2 + (train_data[:, 1] - 0.5) ** 2).sqrt(), \
+                      ((test_data[:, 0] - 0.5) ** 2 + (test_data[:, 1] - 0.5) ** 2).sqrt()
 
-    train_label, test_label = torch.zeros(1000), torch.zeros(1000)
-    train_label[d_train < 1 / torch.sqrt(2 * torch.tensor(math.pi))] = 1
-    test_label[d_test < 1 / torch.sqrt(2 * torch.tensor(math.pi))] = 1
+    train_label, test_label = empty(1000).new_zeros(1000), empty(1000).new_zeros(1000)
+    pi = empty(1).new_ones(1)*math.pi
+    train_label[d_train < 1 / (2 * pi).sqrt()] = 1
+    test_label[d_test < 1 / (2 * pi).sqrt()] = 1
 
     return train_data, test_data, train_label, test_label
 
