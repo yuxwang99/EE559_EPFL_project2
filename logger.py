@@ -7,7 +7,6 @@ import os.path
 import shutil
 import sys
 from datetime import datetime
-# from six.moves import input
 import errno
 
 __all__ = ['set_logger_dir', 'auto_set_dir', 'get_logger_dir']
