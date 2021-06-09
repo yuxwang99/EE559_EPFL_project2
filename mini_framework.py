@@ -180,7 +180,7 @@ class L1loss(Module):
 
     def forward(self, pred, target):
         output = F_L1(pred, target)
-        self.cache = (pred - target).clone()
+        self.cache = (pred - target)
         return output
 
     def backward(self):
