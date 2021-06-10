@@ -395,7 +395,7 @@ class Conv1D(Module):
 
         self.bias_grad = dl.sum([0, 2])
         
-        self.weight = self.weight - eta * self.weight_grad
+        self.kernel = self.kernel - eta * self.kernel_grad
         self.bias = self.bias - eta * self.bias_grad
         
         return dx
