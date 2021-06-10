@@ -394,6 +394,10 @@ class Conv1D(Module):
                     self.kernel_grad[c_out] += x_slice * dl[n, c_out, l]
 
         self.bias_grad = dl.sum([0, 2])
+        
+        self.weight = self.weight - eta * self.weight_grad
+        self.bias = self.bias - eta * self.bias_grad
+        
         return dx
 
     def reset_parameters(self):
